@@ -23,7 +23,7 @@ source:
 	xsel -ib < /tmp/source
 edit:
 	$(VIM) $(TASKNAME).cpp
-run: $(TASKNAME)
+run: $(TASKNAME) source
 	./$(TASKNAME)
 	cp outp /tmp/outp
 	cat outp
