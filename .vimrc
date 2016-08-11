@@ -227,8 +227,8 @@ if !exists("g:syntastic_c_compiler_options")
 endif
 
 "x11 clipboard"
-vmap . "+
-nmap . "+
+"vmap . "+
+"nmap . "+
 
 nnoremap <A-1> 1gt
 nnoremap <A-2> 2gt
