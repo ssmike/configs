@@ -97,7 +97,7 @@ nmap <F3> :q!<CR>
 nmap s :w<CR>
 
 set autoindent
-imap {<CR>  {<CR>}<LEFT><CR><UP><TAB>
+imap {<CR>  {<CR>}jjO<TAB>
 imap {<SPACE>   {}<LEFT>
 set number
 set relativenumber
