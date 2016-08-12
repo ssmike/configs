@@ -256,9 +256,9 @@ nmap <c-a> GVgg
 imap jj <ESC>
 imap ii <ESC>
 imap iw <ESC>
-"inoremap <Up> <NOP>
+inoremap <Up> <NOP>
 inoremap <Down> <NOP>
-"inoremap <Left> <NOP>
+inoremap <Left> <NOP>
 inoremap <Right> <NOP>
 noremap <Up> <NOP>
 noremap <Down> <NOP>
