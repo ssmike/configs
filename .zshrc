@@ -8,13 +8,13 @@ export GOOGLE=8.8.8.8
 export PATH=$PATH:~/.cabal/bin
 export BROWSER=chromium-browser
 
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh 
 typeset -A ZSH_HIGHLIGHT_STYLES
 
 ZSH_HIGHLIGHT_STYLES=(
         'alias'           'fg=green'
         'builtin'         'fg=cyan'
-        'function'        'fg=cyan'
+        'function'        'fg=green'
         'command'         'fg=255,bold'
         'precommand'      'fg=magenta, underline'
         'hashed-commands' 'fg=cyan'
@@ -122,13 +122,14 @@ get_visible_length() {
 }
 
 pre-prompt() {
+  local PREPROMPT="%F{yellow}%m%f%F{blue}/%f"
   local PWD_STYLE="%B%F{blue}%2~%b%f"
   [  "$UID" = "0" ] && PWD_STYLE="%B%F{red}%2~%b%f"
-  local CVS=$(cvs_prompt)
-  if [ ! -z "$CVS" ]; then
-    CVS="$CVS : "
+  ZSH_CVS=`cvs_prompt`
+  if [ ! -z "$ZSH_CVS" ]; then
+    ZSH_CVS="$ZSH_CVS : "
   fi
-  local LEFT="%F{black}%B.%b%f%B%F{green}(%b$CVS$PWD_STYLE%B%F{green})%b"
+  local LEFT="%F{black}%B.%b%f%B%F{green}(%b$PREPROMPT$ZSH_CVS$PWD_STYLE%B%F{green})%b"
   if [ ! -z $VIRTUAL_ENV ]; then
     LEFT="$LEFT%F{red}[`echo $VIRTUAL_ENV | cut -d'/' -f5`]%f"
   fi 
@@ -144,15 +145,25 @@ pre-prompt() {
   if [ $RIGHTWIDTH -lt 1 ]; then
     PWD_STYLE="%B%F{blue}%1~%b%f"
     [  "$UID" = "0" ] && PWD_STYLE="%B%F{red}%1~%b%f"
-    LEFT="%F{black}%B.%b%f%B%F{green}(%b$PWD_STYLE%B%F{green})%b"
+    LEFT="%F{black}%B.%b%f%B%F{green}(%b$PREPROMPT$PWD_STYLE%B%F{green})%b"
     LEFT="$LEFT%F{black}%B"
     LEFT_P="$(print -P "$LEFT")"
     LEFTWIDTH=`get_visible_length "$LEFT_P"`
     RIGHTWIDTH=$(($COLUMNS-$LEFTWIDTH+$RIGHT_DELTA))
   fi
-  print  $LEFT_P${(l:$RIGHTWIDTH::-:)RIGHT_P}
-  PROMPT='%F{black}%B\`--%f%F{white}>%b%f '
-  RPROMPT="%F{grey}%B(%*)%b%f"
+  LEFT_P="$(print -P "$LEFT")"
+  RIGHT_P="$(print -P "$RIGHT")"
+  LEFTWIDTH=`get_visible_length "$LEFT_P"`
+  RIGHT_DELTA=$(($#RIGHT_P-`get_visible_length $RIGHT_P`))
+  RIGHTWIDTH=$(($COLUMNS-$LEFTWIDTH))
+  if [ $RIGHTWIDTH -lt 1 ]; then
+    PROMPT=""
+    PROMPT='%F{black}%B-%f%F{white}>%b%f '
+  else
+    print  $LEFT_P${(l:$RIGHTWIDTH::-:)RIGHT_P}
+    PROMPT='%F{black}%B\`--%f%F{white}>%b%f '
+    RPROMPT="%F{grey}%B(%*)%b%f"
+  fi
 }
 
 
@@ -233,7 +244,6 @@ name() {
     command mv $1 $name
 }
 alias composite="compton -cCGf"
-alias yandex="cadaver https://webdav.yandex.ru"
 
 edit-cmd() {
     ffile="/tmp/.zsh-temp$RANDOM"
@@ -376,7 +386,8 @@ add-zsh-hook precmd notify-command-complete
 #alias -s avi=vlc --fbdev=/dev/fb0
 alias -s jar=java -jar
 alias -s fb2=fbless
-alias -s cpp=vim
+alias -s cpp="vim"
+alias -s h="vim"
 alias -s pdf=okular
 alias -s djvu=okular
 alias -s hs=runhaskell
@@ -439,11 +450,6 @@ function docker-clean() {
   docker ps -a | awk '{print $1}' | xargs --no-run-if-empty docker rm
 }
 
-function arcwelder() {
-  docker run -it --net host --cpuset-cpus 0 --memory 512mb -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY -v ~/.Xauthority:/root/.Xauthority -v $HOME/Downloads:/root/Downloads --device /dev/snd --name arcwelder --privileged thshaw/arc-welder
-  docker rm arcwelder
-}
-
 #gentoo aliases
 alias ascedit='vim ~/.local/share/applications/mimeapps.list ~/.local/share/applications/mimeinfo.cache /usr/share/applications/mimeinfo.cache'
 #alias cp='cp --reflink=auto'
@@ -459,7 +465,7 @@ alias akos-proxy="ssh -D 5222 akos -N"
 alias pasteit='pastebinit -b "http://slexy.org"'
 alias gateway='ip route | grep default | cut -d" " -f3'
 alias grep="grep --color -i -n "
-#alias compile="make 2>./compile-output"
+alias json="python -m json.tool"
 
 prof() {
     gprof $1 | vim -

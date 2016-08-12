@@ -19,11 +19,6 @@
 
 set guiheadroom=0
 
-"for project configuration"
-if filereadable(".vim.local")
-    so .vim.local
-endif
-
 set nocompatible
 filetype off
 
@@ -32,9 +27,6 @@ set rtp+=~/.vim/bundle/vundle/
 call vundle#rc()
 
 filetype plugin indent on
-
-let g:UltiSnipsSnippetDirectories=["UltiSnips"]
-let g:UltiSnipsExpandTrigger="<c-k>"
 
 
 Bundle "Valloric/YouCompleteMe"
@@ -62,6 +54,7 @@ Bundle "ctrlp.vim"
 Bundle "fugitive.vim"
 
 Bundle "easymotion/vim-easymotion"
+Bundle "jpalardy/spacehi.vim"
 
 "Bundle sirver/ultisnips"
 "Bundle honza/vim-snippets"
@@ -73,7 +66,9 @@ Bundle "easymotion/vim-easymotion"
 
 let g:fugitive_git_executable = 'LANG=en git'
 let g:ctrlp_map='<c-f>'
-nmap <c-x> :CtrlPBuffer<CR>
+nmap do :diffget<CR>
+nmap dp :diffput<CR>
+nmap X :CtrlPBuffer<CR>
 nmap <c-n> :bn<CR>
 nmap <c-p> :bp<CR>
 
@@ -92,7 +87,6 @@ set expandtab
 "set formatoptions+=w
 "set tw=80
 nnoremap Q gqip
-
 autocmd FileType make setlocal noexpandtab
 
 set autoread
@@ -106,10 +100,11 @@ set autoindent
 imap {<CR>  {<CR>}<LEFT><CR><UP><TAB>
 imap {<SPACE>   {}<LEFT>
 set number
+set relativenumber
 
 filetype plugin on
 autocmd! BufRead,BufNewFile *.rs 	set filetype=rust
-
+autocmd! BufRead,BufNewFile *.go 	set filetype=go
 "templates api"
 nmap <F9> :make<CR>
 nmap <F8> :!make run<CR>
@@ -118,13 +113,8 @@ nmap <F8> :!make run<CR>
 "vim-conque"
 
 set wildmode=list:longest,full
-nmap e :Explore<CR>
-nmap ct :vertical split<CR>
-nmap vt :split<CR>
 set splitright
 set splitbelow
-nmap < :vertical resize -6<CR>
-nmap > :vertical resize +6<CR>
 nmap <F4> :NERDTree<CR>
 nmap <F5> :TagbarToggle<CR>
 nmap  GVgg
@@ -147,21 +137,21 @@ else
 endif
 
 
-map <Leader> <Plug>(easymotion-prefix)
-" <Leader>f{char} to move to {char}
-map  <Leader>f <Plug>(easymotion-bd-f)
-nmap <Leader>f <Plug>(easymotion-overwin-f)
+map <L<TAB>ader> <Plug>(easymotion-prefix)
+" <L<TAB>ader>f{char} to move to {char}
+map  <TAB>f <Plug>(easymotion-bd-f)
+nmap <TAB>f <Plug>(easymotion-overwin-f)
 
-" s{char}{char} to move to {char}{char}
-nmap <Leader>s <Plug>(easymotion-overwin-f2)
+" s{char}{char} to mov<TAB> to {char}{char}
+nmap <TAB>s <Plug>(easymotion-overwin-f2)
 
 " Move to line
-map <Leader>L <Plug>(easymotion-bd-jk)
-nmap <Leader>L <Plug>(easymotion-overwin-line)
+map <TAB>l <Plug>(easymotion-bd-jk)
+nmap <TAB>l <Plug>(easymotion-overwin-line)
 
 " Move to word
-map  <Leader>w <Plug>(easymotion-bd-w)
-nmap <Leader>w <Plug>(easymotion-overwin-w)
+map  <TAB>w <Plug>(easymotion-bd-w)
+nmap <TAB>w <Plug>(easymotion-overwin-w)
 
 map  / <Plug>(easymotion-sn)
 omap / <Plug>(easymotion-tn)
@@ -172,6 +162,8 @@ omap / <Plug>(easymotion-tn)
 map  n <Plug>(easymotion-next)
 map  N <Plug>(easymotion-prev)
 set nohlsearch
+
+set autochdir
 
 " tool menu
 set guioptions-=T
@@ -206,8 +198,6 @@ nmap <C-t> :GhcModType<CR>
 imap <C-t> <C-O>:GhcModType<CR>
 " TODO: vmap keybinding
 nmap <C-F9> :GhcModCheck<CR>
-nmap <C-u> :GhcModInfoPreview<CR>
-imap <C-u> <C-O>:GhcModInfoPreview<CR>
 
 autocmd BufRead *.gradle setlocal ft=groovy
 autocmd BufRead *.hamlet setlocal ft=hamlet
@@ -227,8 +217,8 @@ if !exists("g:syntastic_c_compiler_options")
 endif
 
 "x11 clipboard"
-vmap . "+
-nmap . "+
+vmap | "+
+nmap | "+
 
 nnoremap <A-1> 1gt
 nnoremap <A-2> 2gt
@@ -251,9 +241,6 @@ command! -nargs=1 Include call Includefunction('<args>')
 
 set tags=./tags;/
 
-imap jj <ESC>
-map J gt
-map K gT
 set timeoutlen=300
 set mouse=a
 
@@ -264,6 +251,23 @@ set imsearch=0
 map <c-a> 
 map! <c-a> 
 nmap <c-a> GVgg
+
+"true vimer
+imap jj <ESC>
+imap ii <ESC>
+imap iw <ESC>
+"inoremap <Up> <NOP>
+inoremap <Down> <NOP>
+"inoremap <Left> <NOP>
+inoremap <Right> <NOP>
+noremap <Up> <NOP>
+noremap <Down> <NOP>
+noremap <Left> <NOP>
+noremap <Right> <NOP>
+
+autocmd InsertEnter * :set norelativenumber
+autocmd InsertLeave * :set relativenumber
+
 ""highlight lCursor guifg=NONE guibg=Cyan
 set spelllang=ru_yo,en_us
 
@@ -304,7 +308,9 @@ let g:ycm_semantic_triggers = {'haskell' : ['.']}
 let g:ghcmod_ghc_options = ['-fno-warn-missing-signatures']
 
 nmap <c-c> :YcmCompleter GoToDeclaration<CR>
+nmap <c-j> :YcmCompleter GoToDefinition<CR>
 nmap <c-k> :YcmCompleter GetDoc<CR>
+nmap <c-e> :YcmCompleter GoToInclude<CR>
 
 let g:clang_format#code_style='google'
 autocmd FileType c,cpp,objc nnoremap <c-k> :<C-u>ClangFormat<CR>
@@ -320,7 +326,26 @@ highlight Search term=bold,reverse ctermfg=11 ctermbg=12 guifg=#ffff00 guibg=#00
 au FileType mail let b:delimitMate_autoclose = 0
 
 "match ErrorMsg '\%>80v.\+'
+
 nmap ]] :cn<CR>
 nmap [[ :cp<CR>
-
 let g:ycm_python_binary_path='python'
+
+"ya vim doesn't see my x session
+imap <c-v> <c-r>=system('xsel -b')<cr>
+
+
+function Extcommand(...)
+    normal i<c-r>=system(\'a:000\')<cr>
+endfunction
+
+let parent=1
+let local_vimrc = ".vim.local"
+while parent <= 40
+    if filewritable(local_vimrc)
+        exe ":so " . local_vimrc
+    endif
+    let local_vimrc = "../". local_vimrc
+    let parent = parent+1
+endwhile
+unlet parent local_vimrc
