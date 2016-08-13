@@ -14,7 +14,7 @@ typeset -A ZSH_HIGHLIGHT_STYLES
 ZSH_HIGHLIGHT_STYLES=(
         'alias'           'fg=green'
         'builtin'         'fg=cyan'
-        'function'        'fg=green'
+        'function'        'fg=red'
         'command'         'fg=255,bold'
         'precommand'      'fg=magenta, underline'
         'hashed-commands' 'fg=cyan'
