@@ -7,7 +7,6 @@ cdemu-daemon &
 nitrogen --restore &
 #krunner &
 xfce4-power-manager &
-~/.xmonad/dzen-auto.sh &
 ~/.xmonad/lightsOn.sh 120 &
 gnome-keyring-daemon &
 nm-applet &
