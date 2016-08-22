@@ -117,7 +117,6 @@ set splitright
 set splitbelow
 nmap <F4> :NERDTree<CR>
 nmap <F5> :TagbarToggle<CR>
-nmap  GVgg
 
 " for pwd following
 "autocmd BufEnter * lcd %:p:h
@@ -248,9 +247,9 @@ set mouse=a
 set keymap=russian-jcukenwin
 set iminsert=0
 set imsearch=0
-map <c-a> 
-map! <c-a> 
-nmap <c-a> GVgg
+
+imap <c-a> 
+nmap <c-s> GVgg
 
 "true vimer
 imap jj <ESC>
