@@ -1,4 +1,5 @@
-import System.Environment
+import System.Posix.Env (setEnv)
+import qualified System.Environment as E
 import Control.Monad
 import XMonad.Config.Desktop
 import Data.Monoid;
@@ -25,6 +26,7 @@ import XMonad.Util.NamedScratchpad
 import XMonad.Util.WorkspaceCompare
 import XMonad.Layout.PerWorkspace
 import XMonad.Layout.Mosaic
+import XMonad.Actions.CycleWS
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 import XMonad.Actions.CopyWindow
@@ -38,7 +40,7 @@ import XMonad.Hooks.SetWMName
 
 
 myTerminal :: String
-myTerminal      = "term"
+myTerminal      = "gnome-terminal"
 
 -- | modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
@@ -57,7 +59,7 @@ myNormalBorderColor  ="#6A86B2"
 myFocusedBorderColor ="#DB2828"
 
 scratchpads = [
-    NS "terminal" "term --role scratchpad"
+    NS "terminal" (myTerminal ++ " --role scratchpad")
       (stringProperty "WM_WINDOW_ROLE" =? "scratchpad")
       (customFloating $ W.RationalRect (1/12) 0 (5/6) (1/2)),
     NS "browser" "luakit" (className =? "luakit")
@@ -68,8 +70,8 @@ myXPConfig = defaultXPConfig {
         bgColor = "#000000"
     ,   fgColor = "#FFFFFF" -- "#5D69B4"
     ,   borderColor = "#3CB424"
-    ,   font = "Ubuntu Mono 12"
-    ,   height = 20
+    --,   font = "Ubuntu Mono 17"
+    ,   height = 30
 }
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -88,19 +90,15 @@ myKeys conf@XConfig {XMonad.modMask = modm} = M.fromList $
     , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
     , ((modm, xK_a), sendMessage ToggleStruts)
     -- launch file manager
-    , ((modm, xK_f), spawn "thunar")
+    , ((modm, xK_f), spawn "nautilus")
     -- go to coresponding workspace
     , ((modm .|. shiftMask, xK_f), windows $ W.greedyView "5:FM")
     , ((modm .|. shiftMask, xK_s), windows $ W.greedyView "6:work")
     , ((modm .|. shiftMask, xK_d), windows $ W.greedyView "7:math")
-    -- go to window prompt
-    , ((modm .|. shiftMask, xK_o     ), windowPromptGoto  myXPConfig)
-    -- bring window prompt
-    , ((modm .|. shiftMask, xK_i     ), windowPromptBring  myXPConfig)
     -- open window selection menu
     , ((modm, xK_o), goToSelected defaultGSConfig)
     -- launch command prompt
-    , ((modm, xK_p     ), shellPrompt myXPConfig)
+    , ((modm, xK_p     ), spawn "dmenu_run")
     -- launch screensaver
     , ((controlMask .|. shiftMask , xK_l), spawn "xscreensaver-command --lock")
     --close current window
@@ -138,7 +136,9 @@ myKeys conf@XConfig {XMonad.modMask = modm} = M.fromList $
     , ((modm             , xK_Left), moveTo Prev (WSIs notSP))
     , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
     --send window to etc
-    ,((modm .|. shiftMask, xK_a), windows $ W.shift "9:etc")
+    , ((modm .|. shiftMask, xK_a), windows $ W.shift "9:etc")
+    , ((modm .|. shiftMask, xK_h), swapPrevScreen)
+    , ((modm .|. shiftMask, xK_l), swapNextScreen)
     ]
     ++
     --
@@ -157,10 +157,11 @@ myKeys conf@XConfig {XMonad.modMask = modm} = M.fromList $
     [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
         | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
-  ++
-  [((m .|. modm, k), windows $ f i)
-   | (i, k) <- zip (XMonad.workspaces conf) [xK_1 ..]
-  , (f, m) <- [(W.view, 0), (W.shift, shiftMask), (copy, controlMask)]]
+    ++
+
+    [((m .|. modm, k), windows $ f i)
+     | (i, k) <- zip (XMonad.workspaces conf) [xK_1 ..]
+    , (f, m) <- [(W.view, 0), (W.shift, shiftMask), (copy, controlMask)]]
 
 notSP = (return $ ("NSP" /=) . W.tag) :: X (WindowSpace -> Bool)
 
@@ -178,6 +179,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
                                        >> windows W.shiftMaster))
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
+
 myLayout = modifiers $  ( onWorkspaces ["9:etc"] (cross ||| Full) $
                             onWorkspaces ["3:code", "6:work", "7:math"]
                                 (my_mosaic ||| Full ||| Mirror tiled) $
@@ -224,15 +226,15 @@ myManageHook = (scratchpadManageHook (W.RationalRect 0 0 1 0.4)) <+>
         game = ["Steam", "dota_linux", "XCOM: Enemy Within"]
         math = ["TexMaker", "XMaxima", "Wxmaxima", "geogebra-GeoGebra", "XMathematica"]
         work = ["Blender", "Gimp", "Gimp-2.8", "Gimp-2.9", "okular", "Okular", "Zathura", "libreoffice", "libreoffice-writer", "libreoffice-calc", "libreoffice-impress", "libreoffice-startcenter", "VCLSalFrame.DocumentWindow", "VCLSalFrame"]
-        web = ["Opera", "Chromium", "chromium-browser-chromium", "Chromium-browser", "Firefox"]
+        web = ["yandex-browser-beta", "Opera", "Chromium-browser-chromium", "Chromium", "chromium-browser-chromium", "Chromium-browser", "Firefox"]
         code = ["QtCreator", "Pycrust-3.0", "jetbrains-idea", "Qvim", "Emacs", "Gvim", "jetbrains-idea-ce", "Codelite", "NetBeans IDE 8.0", "Subl3", "Leksah"]
         fullfloat = ["trayer", "panel"]
         float = ["Kmix", "org.kde.gwenview", "kmix", "Klipper", "ksplashx", "ksplashqml", "ksplashsimple", "Yakuake", "Plasma-desktop", "XTerm", "Tilda", "Blueman-services", "Nm-connection-editor", "Blueman-manager", "mpv", "MPlayer", "Umplayer", "Smplayer", "Vlc", "Gnuplot", "VirtualBox", "Wine", "Gcdemu", "Docky"]
         ignore = ["Snapfly", "trayer", "Zenity", "Oblogout"]
-        im = ["Corebird", "Slack", "Telegram"]
+        im = ["Pidgin", "Corebird", "Slack", "Telegram", "TelegramDesktop"]
         --media = ["mpv", "google-music-electron", "Tomahawk", "Vlc", "MPlayer", "Umplayer", "Smplayer", "Cheese", "Minitube"]
-        fM = ["k4dirstat", "krusader", "Pcmanfm", "Dolphin", "Gnome-commander", "Thunar", "Baobab", "Catfish"]
-        etc = ["nuvolaplayer3-deezer", "nuvolaplayer3", "qBittorrent", "Kmail", "kmail", "Clementine", "Transmission-gtk", "Transmission-qt" ,"Deluge", "Ekiga", "Claws-mail"]
+        fM = ["Nautilus", "k4dirstat", "krusader", "Pcmanfm", "Dolphin", "Gnome-commander", "Thunar", "Baobab", "Catfish"]
+        etc = ["nuvolaplayer3-deezer", "nuvolaplayer3", "Qbittorrent", "Kmail", "kmail", "Clementine", "Transmission-gtk", "Transmission-qt" ,"Deluge", "Ekiga", "Claws-mail"]
 
 myEventHook e = do
     screenCornerEventHook e
@@ -250,8 +252,8 @@ myLogHook dzen = do
   --setWMName "LG3D"
 
 main = do
-    dzen <- spawnPipe "/usr/bin/dzen2 -ta l -dock -x 0 -y 0 -e -"
-    setEnv "_JAVA_AWT_WM_NONREPARENTING" "1"
+    dzen <- spawnPipe "/usr/bin/dzen2 -xs 1 -ta l -dock -x 0 -y 0 -e -"
+    setEnv "_JAVA_AWT_WM_NONREPARENTING" "1" True
     xmonad $ ewmh $ kde4Config {
             terminal           = myTerminal,
             focusFollowsMouse  = False,
@@ -312,5 +314,6 @@ dzenpp status = defaultPP {
            where
             deleteMinimize s = if "Minimize " `isPrefixOf` s then drop (length "Minimize ") s else s
             layoutClickable s = "^ca(1,xdotool key super+space)" ++ s ++ "^ca()"
+            titleClickable s = "^ca(1,xdotool key super+shift+c)" ++ s ++ "^ca()"
             workspaceClickable s = "^ca(1,xdotool key super+" ++ (take 1 s) ++ ")" ++ s ++ "^ca()"
 
