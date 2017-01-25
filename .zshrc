@@ -178,10 +178,6 @@ chprompt() {
 autoload -Uz compinit
 compinit
 
-source aws_zsh_completer.sh
-. <(azure --completion)
-
-
 function _pip_completion {
   local words cword
   read -Ac words
