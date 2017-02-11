@@ -160,7 +160,8 @@ pre-prompt() {
     RPROMPT=""
     PROMPT='%F{black}%B-%f%F{white}>%b%f '
   else
-    PROMPT="$LEFT${(l:$RIGHTWIDTH::-:)RIGHT}"'%F{black}%B\`--%f%F{white}>%b%f '
+    PROMPT="$LEFT${(l:$RIGHTWIDTH::-:)RIGHT}"'
+%F{black}%B\`--%f%F{white}>%b%f '
     RPROMPT="%F{grey}%B(%*)%b%f"
   fi
 }
