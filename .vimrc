@@ -37,7 +37,6 @@ Bundle "scrooloose/nerdtree"
 Bundle "scrooloose/syntastic"
 Bundle "pbrisbin/vim-syntax-shakespeare"
 
-Bundle "javacomplete"
 Bundle "dirkwallenstein/vim-localcomplete"
 Bundle "chriskempson/vim-tomorrow-theme"
 Bundle "Tagbar"
@@ -51,10 +50,26 @@ Bundle "gerw/vim-latex-suite"
 "set rtp+=~/.vim/bundle/vim-latex-suite
 Bundle "mhinz/vim-startify"
 Bundle "ctrlp.vim"
-Bundle "fugitive.vim"
+Bundle "tpope/vim-fugitive"
+Bundle "Yggdroot/indentLine"
 
 Bundle "easymotion/vim-easymotion"
 Bundle "jpalardy/spacehi.vim"
+Bundle "juneedahamed/vc.vim"
+Bundle "tpope/vim-fireplace"
+Bundle "tpope/vim-salve"
+Bundle "suan/vim-instant-markdown"
+Bundle "tpope/vim-dispatch"
+Bundle "rking/ag.vim"
+Bundle "glsl.vim"
+Bundle "mhinz/vim-signify"
+Bundle "gnupg.vim"
+
+let g:vc_browse_cache_all = 1
+
+let g:instant_markdown_slow = 1
+
+let g:fugitive_git_executable = 'LANG=en git'
 
 "Bundle sirver/ultisnips"
 "Bundle honza/vim-snippets"
@@ -78,10 +93,8 @@ Bundle "wting/rust.vim"
 Bundle "groovy.vim"
 Bundle "craigemery/vim-autotag"
 
-Bundle "rhysd/vim-clang-format"
-
-set tabstop=2
-set shiftwidth=2
+set tabstop=4
+set shiftwidth=4
 set smarttab
 set expandtab
 "set formatoptions+=w
@@ -90,10 +103,8 @@ nnoremap Q gqip
 autocmd FileType make setlocal noexpandtab
 
 set autoread
-nmap <TAB> :tabn<CR>
-nmap <BACKSPACE> :tabp<CR>
-nmap <F2> :tabnew<CR>
-nmap <F3> :q!<CR>
+nmap <TAB> :bn<CR>
+nmap <BACKSPACE> :bp<CR>
 nmap s :w<CR>
 
 set autoindent
@@ -105,9 +116,7 @@ set relativenumber
 filetype plugin on
 autocmd! BufRead,BufNewFile *.rs 	set filetype=rust
 autocmd! BufRead,BufNewFile *.go 	set filetype=go
-"templates api"
-nmap <F9> :make<CR>
-nmap <F8> :!make run<CR>
+autocmd! BufNewFile,BufRead *.frag,*.vert,*.fp,*.vp,*.glsl set filetype=glsl
 
 " < ./inp<CR>
 "vim-conque"
@@ -115,8 +124,9 @@ nmap <F8> :!make run<CR>
 set wildmode=list:longest,full
 set splitright
 set splitbelow
-nmap <F4> :NERDTree<CR>
 nmap <F5> :TagbarToggle<CR>
+nmap <F2> :NERDTree<CR>
+nmap  GVgg
 
 " for pwd following
 "autocmd BufEnter * lcd %:p:h
@@ -136,7 +146,7 @@ else
 endif
 
 
-map <L<TAB>ader> <Plug>(easymotion-prefix)
+map <TAB>p <Plug>(easymotion-prefix)
 " <L<TAB>ader>f{char} to move to {char}
 map  <TAB>f <Plug>(easymotion-bd-f)
 nmap <TAB>f <Plug>(easymotion-overwin-f)
@@ -170,6 +180,11 @@ set guioptions-=T
 set guioptions-=m
 " tab appearance
 set guioptions-=e
+" scrollbars
+set guioptions-=r
+set guioptions-=R
+
+set guiheadroom=0
 
 set completeopt=menu,menuone
 let g:syntastic_enable_signs=1
@@ -255,14 +270,6 @@ nmap <c-s> GVgg
 imap jj <ESC>
 imap ii <ESC>
 imap iw <ESC>
-inoremap <Up> <NOP>
-inoremap <Down> <NOP>
-inoremap <Left> <NOP>
-inoremap <Right> <NOP>
-noremap <Up> <NOP>
-noremap <Down> <NOP>
-noremap <Left> <NOP>
-noremap <Right> <NOP>
 
 autocmd InsertEnter * :set norelativenumber
 autocmd InsertLeave * :set relativenumber
@@ -307,20 +314,23 @@ let g:ycm_semantic_triggers = {'haskell' : ['.']}
 let g:ghcmod_ghc_options = ['-fno-warn-missing-signatures']
 
 nmap <c-c> :YcmCompleter GoToDeclaration<CR>
-nmap <c-j> :YcmCompleter GoToDefinition<CR>
+nmap <c-x> :YcmCompleter GoToDefinition<CR>
 nmap <c-k> :YcmCompleter GetDoc<CR>
 nmap <c-e> :YcmCompleter GoToInclude<CR>
 
-let g:clang_format#code_style='google'
 autocmd FileType c,cpp,objc nnoremap <c-k> :<C-u>ClangFormat<CR>
 autocmd FileType c,cpp,objc vnoremap <c-k> :ClangFormat<CR>
 autocmd FileType tex set keymap=russian-jcukenwin
-"let g:clang_format#auto_format=1
 
 let NERDTreeIgnore = ['\.pyc$']
 highlight Pmenu ctermbg=darkgray ctermfg=white
 highlight Todo term=reverse ctermbg=1 guibg=DarkRed
 highlight Search term=bold,reverse ctermfg=11 ctermbg=12 guifg=#ffff00 guibg=#0000ff
+
+highlight SignColumn ctermbg=None
+highlight SignifySignDelete ctermbg=None ctermfg=red
+highlight SignifySignAdd ctermbg=None ctermfg=green
+highlight SignifySignChange ctermbg=None ctermfg=magenta
 
 au FileType mail let b:delimitMate_autoclose = 0
 
