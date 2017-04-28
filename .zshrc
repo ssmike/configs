@@ -1,14 +1,11 @@
 source /etc/profile
 source ~/.profile
-source virtualenvwrapper.sh
-#export WINEARCH=win32
+source virtualenvwrapper_lazy.sh
 
 
 export GOOGLE=8.8.8.8
-export PATH=$PATH:~/.cabal/bin
-export BROWSER=chromium-browser
 
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh 
+source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh 
 typeset -A ZSH_HIGHLIGHT_STYLES
 
 ZSH_HIGHLIGHT_STYLES=(
@@ -39,7 +36,7 @@ READNULLCMD=less
 #zle -N insert-brackets
 #bindkey "(" insert-brackets
 
-NOTIFY_ICON="/usr/share/icons/gnome/32x32/apps/konsole.png"
+NOTIFY_ICON="terminal"
 NOTIFY_COMMAND_TIMEOUT=30
 export _JAVA_AWT_WM_NONREPARENTING=1
 
@@ -47,11 +44,6 @@ export _JAVA_AWT_WM_NONREPARENTING=1
 #CLAWS='claws-mail --status | sed -e "s/^[0-9]*\ \([0-9]*\).*/\1/g" | sed -e "s/^$/0/g"'
 #[ ! "$UID" = "0" ] && [ $(bash -c $CLAWS) != 0 ] && echo "===========You have unread mail===========";
 
-if [[ $TERM == linux ]]; then
-    setfont cyr-sun16
-else
-  export TERM=xterm-256color
-fi;
 
 alias ls='ls --color=auto'
 
@@ -93,13 +85,43 @@ function zshexit() {
     clear
 }
 
-function cvs_prompt() {
-    if git branch >/dev/null 2>/dev/null; then
-        ref=$(git symbolic-ref HEAD | sed -e "s/refs\/heads\///")
-        echo -n "%F{red}git%f on %F{green}$ref%f"
-    else
-        echo -n ""
+function get_hg_branch() {
+    max_depth=${#${PWD//[^\/]}}
+    i=1
+    cur_dir=$PWD
+    while (( $i <= $max_depth )); do
+        if [ ! -w $cur_dir ]; then
+            return 1;
+        fi
+        branch_file="$cur_dir/.hg/branch"
+        if [ -f $branch_file ]; then
+            cat $branch_file;
+            return 0;
+        fi
+        cur_dir="$cur_dir/.."
+        ((i++))
+    done
+    return 1;
+}
+
+function with_cvs() {
+    local PWD_STYLE=$1
+    svn_url=`svn info . 2>/dev/null | grep Relative | cut -d ':' -f3`
+    if [ "x$svn_url" != "x" ]; then
+        echo -n "%F{red}svn%f on%F{yellow}%B$svn_url%b%f";
+        return 0;
     fi
+    git_branch=`git symbolic-ref HEAD 2>/dev/null | sed -e "s/refs\/heads\///"`
+    if [ "x$git_branch" != "x" ]; then
+        echo -n "%F{red}git%f on %F{green}$git_branch%f : $PWD_STYLE";
+        return 0;
+    fi
+    hg_branch=`get_hg_branch 2>/dev/null`
+    if [ "x$hg_branch" != "x" ]; then
+        echo -n "%F{red}hg%f on %F{magenta}$hg_branch%f : $PWD_STYLE";
+        return 0;
+    fi
+    echo -n "$PWD_STYLE"
 }
 
 # xterm directory
@@ -125,14 +147,11 @@ pre-prompt() {
   local PREPROMPT="%F{yellow}%m%f%F{blue}/%f"
   local PWD_STYLE="%B%F{blue}%2~%b%f"
   [  "$UID" = "0" ] && PWD_STYLE="%B%F{red}%2~%b%f"
-  ZSH_CVS=`cvs_prompt`
-  if [ ! -z "$ZSH_CVS" ]; then
-    ZSH_CVS="$ZSH_CVS : "
-  fi
-  local LEFT="%F{black}%B.%b%f%B%F{green}(%b$PREPROMPT$ZSH_CVS$PWD_STYLE%B%F{green})%b"
+  local WITH_CVS=`with_cvs "$PWD_STYLE"`
+  local LEFT="%F{black}%B.%b%f%B%F{green}(%f%b$PREPROMPT$WITH_CVS%B%F{green})%b"
   if [ ! -z $VIRTUAL_ENV ]; then
-    LEFT="$LEFT%F{red}[`echo $VIRTUAL_ENV | cut -d'/' -f5`]%f"
-  fi 
+    LEFT="$LEFT%F{red}[`echo $VIRTUAL_ENV | rev | cut -d'/' -f1 | rev`]%f"
+  fi
   # -- color
   LEFT="$LEFT%F{black}%B"
   local RIGHT="."
@@ -144,7 +163,7 @@ pre-prompt() {
   local RIGHTWIDTH=$(($COLUMNS-$LEFTWIDTH))
   if [ $RIGHTWIDTH -lt 1 ]; then
     PWD_STYLE="%B%F{blue}%1~%b%f"
-    [  "$UID" = "0" ] && PWD_STYLE="%B%F{red}%1~%b%f"
+    PWD_STYLE="%B%F{red}%1~%b%f"
     LEFT="%F{black}%B.%b%f%B%F{green}(%b$PREPROMPT$PWD_STYLE%B%F{green})%b"
     LEFT="$LEFT%F{black}%B"
     LEFT_P="$(print -P "$LEFT")"
@@ -156,12 +175,14 @@ pre-prompt() {
   LEFTWIDTH=`get_visible_length "$LEFT_P"`
   RIGHT_DELTA=$(($#RIGHT_P-`get_visible_length $RIGHT_P`))
   RIGHTWIDTH=$(($COLUMNS-$LEFTWIDTH))
+  local GREETER="%F{white}%B>%b%f"
+  [  "$UID" = "0" ] && GREETER="%F{red}%B>%b%f"
   if [ $RIGHTWIDTH -lt 1 ]; then
     RPROMPT=""
-    PROMPT='%F{black}%B-%f%F{white}>%b%f '
+    PROMPT='%F{black}%B-%b%f'"$GREETER "
   else
     PROMPT="$LEFT${(l:$RIGHTWIDTH::-:)RIGHT}"'
-%F{black}%B\`--%f%F{white}>%b%f '
+%F{black}%B\`--%b%f'"$GREETER "
     RPROMPT="%F{grey}%B(%*)%b%f"
   fi
 }
@@ -208,6 +229,8 @@ zstyle ':completion:*' verbose true
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
 
+source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+bindkey '^E' autosuggest-accept
 #source ~/.zsh/zsh-autosuggestions/autosuggestions.zsh
 
 # Enable autosuggestions automatically.
@@ -227,8 +250,8 @@ zstyle ':completion:*:warnings' format '%BSorry, no matches for: %d%b'
 
 # -[ history ]-
 HISTFILE=~/.zsh_history
-HISTSIZE=2000
-SAVEHIST=1000
+HISTSIZE=10000
+SAVEHIST=10000
 
 setopt append_history hist_ignore_all_dups hist_ignore_space autocd extendedglob autopushd
 export LS_COLORS='*.py=3'
@@ -249,7 +272,7 @@ edit-cmd() {
 }
 
 #zle -N edit-cmd
-bindkey -s "" edit-cmd
+bindkey -s "" "edit-cmd\n"
 
 mkd() { mkdir $1; cd $1 }
 battcheck() {
@@ -263,7 +286,7 @@ makeproject() {
     fi
     mkdir $2
     cd $2
-    cp ~/templates/$1/* . -r
+    cp ~/Documents/templates/$1/* . -r
     make edit
 }
 
@@ -273,12 +296,6 @@ alias mkpproject="makeproject python "
 
 alias rmrf="rm -rf $1"
 
-log() {
-    killall conky -SIGSTOP
-    (bash -c $1) > ~/.info
-    sleep 2s
-    killall conky -SIGCONT
-}
 rep() {
   while true; do
     zsh -c $1;
@@ -329,7 +346,7 @@ enum() {
   cat $1 | sed = | sed -e 's/.*/    &/;s/.*\(.\{4\}\)$/\1/;N;s/\n/ /g'
 }
 
-blacklist_regexp="^\(bpython|gdb|mc|livestreamer|okular|tmux|less|nano|vim|mutt|man|qvim|gdb|fbless|htop\).*"
+blacklist_regexp="^\(bpython|gdb|mc|livestreamer|okular|zathura|tmux|less|nano|vim|vi|mutt|man|qvim|gdb|fbless|htop\).*"
 
 function store-command-stats() {
   last_command=$1
@@ -345,7 +362,7 @@ function notify-error {
   now=$(date "+%s")
   (( diff = $now - $start_time ))
   if (( $diff > $NOTIFY_COMMAND_TIMEOUT )); then
-    notify-send -i $NOTIFY_ICON "$2 failed";
+    notify-send -u critical -i $NOTIFY_ICON "$2 failed";
   fi
 }
 
@@ -357,7 +374,7 @@ function notify-success() {
   now=$(date "+%s")
   (( diff = $now - $start_time ))
   if (( $diff > $NOTIFY_COMMAND_TIMEOUT )); then
-    notify-send -i $NOTIFY_ICON "$2 finished";
+    notify-send -u normal -i $NOTIFY_ICON "$2 finished";
   fi
 }
 
@@ -380,13 +397,15 @@ add-zsh-hook precmd notify-command-complete
 
 # -[ alias ]-
 #alias -s avi=vlc --fbdev=/dev/fb0
+alias -s proto="vim"
 alias -s jar=java -jar
 alias -s fb2=fbless
 alias -s cpp="vim"
 alias -s h="vim"
-alias -s pdf=okular
-alias -s djvu=okular
+alias -s pdf="zathura"
+alias -s djvu="zathura"
 alias -s hs=runhaskell
+alias -s txt="vim"
 #alias -s mkv=vlc --fbdev=/dev/fb0
 #alias -s mp4=vlc --fbdev=/dev/fb0
 #alias -s mov=vlc --fbdev=/dev/fb0
@@ -418,28 +437,9 @@ function slovari {
 }
 alias t=slovari
 
-function keyw {
-  sudo $EDITOR /etc/portage/package.accept_keywords/$1
-}
-
-function use {
-  sudo $EDITOR /etc/portage/package.use/$1
-}
 
 function debug-flags; {
     echo -Wall -Wextra -pedantic -std=c++11 -O2 -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wcast-qual -Wcast-align -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -fsanitize=address -fsanitize=undefined -fstack-protector -lmcheck -D_FORTIFY_SOURCE=2
-}
-
-function xsearch() {
-  grep --color -i $1 ~/.local/share/applications/{mimeapps.list,mimeinfo.cache} /usr/share/applications/mimeinfo.cache
-}
-
-function xset() {
-  xdg-mime default $2 $1
-}
-
-function xquery() {
-  xdg-mime query default $1
 }
 
 function docker-clean() {
@@ -447,7 +447,6 @@ function docker-clean() {
 }
 
 #gentoo aliases
-alias ascedit='vim ~/.local/share/applications/mimeapps.list ~/.local/share/applications/mimeinfo.cache /usr/share/applications/mimeinfo.cache'
 #alias cp='cp --reflink=auto'
 alias popd="popd -q"
 alias femerge='sudo env FEATURES="-collision-detect -protect-owned" emerge'
@@ -469,7 +468,7 @@ prof() {
 alias pulse="pulseaudio -k && pulseaudio --start"
 alias vncreadonly="x11vnc -usepw -forever -viewonly"
 
-function fix-steam-c++() {
-  cp /usr/lib64/gcc/x86_64-pc-linux-gnu/5.3.0/libstdc++.so.6 /home/mike/.local/share/Steam/ubuntu12_32/steam-runtime/amd64/usr/lib/x86_64-linux-gnu/libstdc++.so.6
-  cp /usr/lib64/gcc/x86_64-pc-linux-gnu/5.3.0/libstdc++.so.6 /home/mike/.local/share/Steam/ubuntu12_32/steam-runtime/i386/usr/lib/i386-linux-gnu/libstdc++.so.6
-}
+alias mosh="LC_ALL=en_US.UTF-8 mosh"
+
+# Allow SSH tab completion for mosh hostnames
+compdef mosh=ssh
