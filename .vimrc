@@ -14,9 +14,8 @@ filetype off
 set title
 
 call plug#begin('~/.vim/plugged')
-    Plug 'Valloric/YouCompleteMe', {'do': 'python ./install.py --clang-completer --gocode-completer --racer-completer'}
+    Plug 'Valloric/YouCompleteMe', {'do': 'python ./install.py --clang-completer --java-completer --racer-completer'}
     Plug 'LnL7/vim-nix', {'for': 'nix'}
-    Plug 'artur-shaik/vim-javacomplete2', {'for': 'java'}
 
     Plug 'tpope/vim-fugitive'
     Plug 'gregsexton/gitv', {'on': 'Gitv'}
@@ -210,10 +209,6 @@ nmap `m :set fdm=manual<CR>
 
 set completeopt-=preview
 set splitbelow
-
-
-autocmd Filetype java setlocal completefunc=javacomplete#Complete
-""autocmd Filetype java setlocal omnifunc=javacomplete#Complete
 
 autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
 autocmd FileType haskell setlocal completefunc=necoghc#omnifunc
