@@ -14,8 +14,9 @@ filetype off
 set title
 
 call plug#begin('~/.vim/plugged')
-    Plug 'Valloric/YouCompleteMe', {'do': 'python ./install.py --clang-completer --java-completer --racer-completer'}
+    Plug 'Valloric/YouCompleteMe', {'do': 'python ./install.py --clang-completer --gocode-completer --racer-completer'}
     Plug 'LnL7/vim-nix', {'for': 'nix'}
+    Plug 'artur-shaik/vim-javacomplete2', {'for': 'java'}
 
     Plug 'tpope/vim-fugitive'
     Plug 'gregsexton/gitv', {'on': 'Gitv'}
@@ -210,6 +211,10 @@ nmap `m :set fdm=manual<CR>
 set completeopt-=preview
 set splitbelow
 
+
+autocmd Filetype java setlocal completefunc=javacomplete#Complete
+""autocmd Filetype java setlocal omnifunc=javacomplete#Complete
+
 autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
 autocmd FileType haskell setlocal completefunc=necoghc#omnifunc
 let g:ycm_semantic_triggers = {'haskell' : ['.'], 'clojure' : ['/', '.']}
@@ -333,6 +338,11 @@ let g:ghcmod_ghc_options = ['-fno-warn-missing-signatures']
 
 nmap <c-k> :YcmCompleter GetDoc<CR>
 
+" more convinient tag jump bindings for me
+nnoremap g] g<c-]>
+nnoremap g] g<c-]>
+nnoremap <space>t :pop<CR>
+
 autocmd Filetype c,cpp,python,rust nmap <buffer> <c-]> :YcmCompleter GoTo<CR>
 command YFix YcmCompleter FixIt
 
@@ -392,7 +402,7 @@ let g:ycm_rust_src_path = '~/.local/rust/src/'
 autocmd! BufRead,BufNewFile *.rs    setlocal makeprg=cargo
 
 " file is large from 100K
-let g:LargeFile = 1024 * 100
+let g:LargeFile = 1024 * 300
 augroup LargeFile
  autocmd BufReadPre * let f=getfsize(expand("<afile>")) | if f > g:LargeFile || f == -2 | call LargeFile() | endif
 augroup END
