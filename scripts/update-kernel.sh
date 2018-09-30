@@ -8,6 +8,7 @@ mount /boot
 make install
 ver=`readlink /usr/src/linux | sed -e 's/linux-//'`
 dracut -H -f --kver $ver
+emerge @module-rebuild
 if which grub-mkconfig; then
     grub-mkconfig > /boot/grub/grub.cfg;
 else
