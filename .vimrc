@@ -57,7 +57,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'l04m33/vlime', {'rtp': 'vim/', 'for': 'lisp'}
     Plug 'mhinz/vim-startify'
 
-    Plug 'flazz/vim-colorschemes'
+    Plug 'ErichDonGubler/vim-sublime-monokai'
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'luochen1990/rainbow', {'for': ['clojure', 'lisp']}
@@ -66,7 +66,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'tpope/vim-salve', {'for': 'clojure'}
     Plug 'tpope/vim-fireplace', {'for': 'clojure'}
 
-    Plug 'majutsushi/tagbar', {'on': 'TagbarToggle'}
+    Plug 'majutsushi/tagbar'
 
     Plug 'craigemery/vim-autotag'
 
@@ -75,7 +75,6 @@ call plug#begin('~/.vim/plugged')
     else
         Plug 'mklabs/split-term.vim'
     endif
-    Plug 'chriskempson/vim-tomorrow-theme'
 call plug#end()
 
 au FileType clojure nmap <buffer> <c-]> ]<c-d>
@@ -94,6 +93,7 @@ let mapleader = " "
 let g:LanguageClient_serverCommands = {
   \ 'rust': ['rls'],
   \ 'cpp': ['clangd'],
+  \ 'c': ['clangd'],
   \ 'python': ['pyls'],
   \ 'java': ['jdt.ls'],
   \ 'haskell': ['hie-wrapper']
@@ -177,8 +177,6 @@ set splitright
 set splitbelow
 "nmap < :vertical resize -6<CR>
 "nmap > :vertical resize +6<CR>
-nmap <F2> :NERDTree<CR>
-nmap  GVgg
 
 " for pwd following
 "autocmd BufEnter * lcd %:p:h
@@ -188,10 +186,10 @@ syn on
 let g:airline#extensions#tabline#enabled = 1
 set laststatus=2
 if exists('g:GtkGuiLoaded')
-    colorscheme molokai
+    colorscheme sublimemonokai
     call rpcnotify(1, 'Gui', 'Option', 'Tabline', 0)
 elseif has('gui_running') "gvim
-    colorscheme Tomorrow-Night
+    colorscheme sublimemonokai
     set guifont=Inconsolata\ 10
     let g:airline_theme='raven'
 else
@@ -304,8 +302,9 @@ endfunction
 autocmd FileType tex call TexMode()
 autocmd FileType mail call DualLangMode()
 
-nmap <c-a> GVgg
+"nmap <c-a> GVgg
 imap jj <ESC>
+tnoremap jj <C-\><C-n>
 
 autocmd InsertEnter * :set norelativenumber
 autocmd InsertLeave * :set relativenumber
@@ -340,6 +339,8 @@ highlight Todo term=reverse ctermbg=1 guibg=DarkRed
 highlight Search term=bold,reverse ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
 
 silent! highlight SignColumn ctermbg=None guibg=None
+silent! highlight FoldColumn ctermbg=None guibg=None
+silent! highlight Folded ctermbg=None guibg=None
 highlight SignifySignDelete ctermbg=None ctermfg=red
 highlight SignifySignAdd ctermbg=None ctermfg=green
 highlight SignifySignChange ctermbg=None ctermfg=magenta
@@ -406,6 +407,7 @@ if has('python3')
     nmap <leader>f :Denite -auto-resize file<CR>
     nmap gw :DeniteCursorWord -mode=normal -auto-resize grep<CR>
     command! -nargs=1 Ag :Denite -mode=normal -auto-resize grep -input='<args>'
+    command! Fix :Denite -mode=normal -auto-resize codeAction
     nmap <leader>r :Denite -auto-resize register<CR>
     call denite#custom#map('insert', 'jj', '<denite:enter_mode:normal>', 'noremap')
 else
@@ -414,5 +416,17 @@ else
     nmap gw gagiw
 endif
 
+set cinoptions=g0,(4
+
 nmap <SPACE>] <C-]>
 nmap <SPACE>[ <C-o>
+
+if !has("nvim")
+    let &t_SI = "\<Esc>[6 q"
+    let &t_SR = "\<Esc>[4 q"
+    let &t_EI = "\<Esc>[2 q"
+endif
+
+let g:startify_session_persistence = 1
+
+set clipboard=unnamedplus
