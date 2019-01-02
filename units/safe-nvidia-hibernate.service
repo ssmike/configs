@@ -7,12 +7,12 @@ StopWhenUnneeded=true
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=-/bin/sh -c '\
-  /bin/systemctl stop nvidia-powersave.timer \
-  /sbin/modprobe nvidia \
+  /bin/systemctl stop nvidia-powersave.timer; \
+  /sbin/modprobe nvidia; \
 '
 
 ExecStop=-/bin/sh -c '\
-  /bin/systemctl start nvidia-powersave.timer \
+  /bin/systemctl start nvidia-powersave.timer; \
 '
 
 [Install]
