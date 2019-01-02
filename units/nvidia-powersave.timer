@@ -1,0 +1,9 @@
+[Unit]
+Description="powersave timer"
+
+[Timer]
+OnActiveSec=1s
+OnUnitActiveSec=2s
+
+[Install]
+WantedBy=timers.target

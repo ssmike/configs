@@ -1,0 +1,7 @@
+[Unit]
+Description="powersave helper"
+
+[Service]
+Type=oneshot
+ExecStart=-/sbin/rmmod nvidia_drm nvidia-modeset nvidia_uvm nvidia
+
