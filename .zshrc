@@ -22,6 +22,13 @@ ZSH_HIGHLIGHT_STYLES=(
         'globbing'        'fg=166'
 )
 
+TIMEFMT='%U user %S system %P cpu %*E total'$'\n'\
+'max resident memory:       %M MB'$'\n'\
+'involountary switches:     %c'$'\n'\
+'volountary switches:       %w'$'\n'\
+'major page faults:         %F'$'\n'\
+'minor page faults:         %R'
+
 #export _JAVA_OPTIONS="-Dawt.useSystemAAFontSettings=on"
 READNULLCMD=less
 
@@ -141,6 +148,7 @@ get_visible_length() {
 }
 
 pre-prompt() {
+  local exit_code=$?
   local PREPROMPT="%F{$COLOR[yellow]}%m%f%F{$COLOR[blue]}/%f"
   local PWD_STYLE="%F{$COLOR[br-blue]}%2~%f"
   [  "$UID" = "0" ] && PWD_STYLE="%F{$COLOR[br-red]}%2~%f"
@@ -148,6 +156,9 @@ pre-prompt() {
   local LEFT="%F{$COLORS[br-black]}.%f%F{$COLOR[br-green]}(%f$PREPROMPT$WITH_CVS%F{$COLOR[br-green]})%f"
   if [ ! -z $VIRTUAL_ENV ]; then
     LEFT="$LEFT%F{$COLOR[red]}[`echo $VIRTUAL_ENV | rev | cut -d'/' -f1 | rev`]%f"
+  fi
+  if [[ $exit_code != 0 ]]; then
+    LEFT="$LEFT%F{$COLOR[br-black]}[%f%F{$COLOR[br-black]}$exit_code%f%F{$COLOR[br-black]}]%f"
   fi
   # -- color
   LEFT="$LEFT%F{$COLOR[br-black]}"
