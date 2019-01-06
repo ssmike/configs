@@ -1,7 +1,9 @@
 #!/bin/bash
 cd /usr/src/linux
-zcat /proc/config.gz > ./.config
-make oldconfig
+if [ ! -f /usr/src/linux/.config.old2 ]; then
+    zcat /proc/config.gz > ./.config
+    make oldconfig
+fi
 make -j4
 make modules_install
 mount /boot
