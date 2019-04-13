@@ -58,6 +58,9 @@ call plug#begin('~/.vim/plugged')
     Plug 'mhinz/vim-startify'
 
     Plug 'ErichDonGubler/vim-sublime-monokai'
+    Plug 'aonemd/kuroi.vim'
+    Plug 'kaicataldo/material.vim'
+
     Plug 'vim-airline/vim-airline'
     Plug 'vim-airline/vim-airline-themes'
     Plug 'luochen1990/rainbow', {'for': ['clojure', 'lisp']}
@@ -194,7 +197,7 @@ elseif has('gui_running') "gvim
     set guifont=Inconsolata\ 10
     let g:airline_theme='raven'
 else
-    colorscheme pablo "terminal
+    colorscheme kuroi "terminal
     let g:airline_theme='raven'
 endif
 
