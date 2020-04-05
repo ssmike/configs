@@ -138,7 +138,7 @@ function with_cvs() {
     fi
     arc_branch=`ascending_find_file .arc/HEAD 2>/dev/null | sed -e 's/^.*\"\(.*\)\"/\1/'`
     if [ "x$arc_branch" != "x" ]; then
-        echo -n "%F{$COLOR[red]}arc%f on %F{$COLOR[grey]}$arc_branch%f : $PWD_STYLE";
+        echo -n "%F{$COLOR[red]}arc%f on %F{$COLOR[cyan]}$arc_branch%f : $PWD_STYLE";
         return 0;
     fi
     echo -n "$PWD_STYLE"
