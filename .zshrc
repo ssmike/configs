@@ -100,7 +100,7 @@ COLOR=(
     "br-white"      15
 )
 
-function get_hg_branch() {
+function ascending_find_file() {
     max_depth=${#${PWD//[^\/]}}
     i=1
     cur_dir=$PWD
@@ -108,28 +108,9 @@ function get_hg_branch() {
         if [ ! -w $cur_dir ]; then
             return 1;
         fi
-        branch_file="$cur_dir/.hg/branch"
+        branch_file="$cur_dir/$1"
         if [ -f $branch_file ]; then
             cat $branch_file;
-            return 0;
-        fi
-        cur_dir="$cur_dir/.."
-        ((i++))
-    done
-    return 1;
-}
-
-function get_arc_branch() {
-    max_depth=${#${PWD//[^\/]}}
-    i=1
-    cur_dir=$PWD
-    while (( $i <= $max_depth )); do
-        if [ ! -w $cur_dir ]; then
-            return 1;
-        fi
-        branch_file="$cur_dir/.arc/HEAD"
-        if [ -f $branch_file ]; then
-            cat $branch_file | sed -e 's/^.*\"\(.*\)\"/\1/';
             return 0;
         fi
         cur_dir="$cur_dir/.."
@@ -150,12 +131,12 @@ function with_cvs() {
         echo -n "%F{$COLOR[red]}git%f on %F{$COLOR[green]}$git_branch%f : $PWD_STYLE";
         return 0;
     fi
-    hg_branch=`get_hg_branch 2>/dev/null`
+    hg_branch=`ascending_find_file .hg/branch 2>/dev/null`
     if [ "x$hg_branch" != "x" ]; then
         echo -n "%F{$COLOR[red]}hg%f on %F{$COLOR[magenta]}$hg_branch%f : $PWD_STYLE";
         return 0;
     fi
-    arc_branch=`get_arc_branch 2>/dev/null`
+    arc_branch=`ascending_find_file .arc/HEAD 2>/dev/null | sed -e 's/^.*\"\(.*\)\"/\1/'`
     if [ "x$arc_branch" != "x" ]; then
         echo -n "%F{$COLOR[red]}arc%f on %F{$COLOR[grey]}$arc_branch%f : $PWD_STYLE";
         return 0;
