@@ -119,6 +119,25 @@ function get_hg_branch() {
     return 1;
 }
 
+function get_arc_branch() {
+    max_depth=${#${PWD//[^\/]}}
+    i=1
+    cur_dir=$PWD
+    while (( $i <= $max_depth )); do
+        if [ ! -w $cur_dir ]; then
+            return 1;
+        fi
+        branch_file="$cur_dir/.arc/HEAD"
+        if [ -f $branch_file ]; then
+            cat $branch_file | sed -e 's/^.*\"\(.*\)\"/\1/';
+            return 0;
+        fi
+        cur_dir="$cur_dir/.."
+        ((i++))
+    done
+    return 1;
+}
+
 function with_cvs() {
     local PWD_STYLE=$1
     svn_url=`svn info . 2>/dev/null | grep Relative | cut -d ':' -f3`
@@ -134,6 +153,11 @@ function with_cvs() {
     hg_branch=`get_hg_branch 2>/dev/null`
     if [ "x$hg_branch" != "x" ]; then
         echo -n "%F{$COLOR[red]}hg%f on %F{$COLOR[magenta]}$hg_branch%f : $PWD_STYLE";
+        return 0;
+    fi
+    arc_branch=`get_arc_branch 2>/dev/null`
+    if [ "x$arc_branch" != "x" ]; then
+        echo -n "%F{$COLOR[red]}arc%f on %F{$COLOR[grey]}$arc_branch%f : $PWD_STYLE";
         return 0;
     fi
     echo -n "$PWD_STYLE"
