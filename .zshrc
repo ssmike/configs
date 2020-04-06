@@ -212,6 +212,7 @@ chprompt() {
 autoload -Uz compinit
 compinit
 
+fpath+=~/.zfunc
 
 function _pip_completion {
   local words cword
