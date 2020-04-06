@@ -38,7 +38,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'gregsexton/gitv', {'on': 'Gitv'}
     Plug 'juneedahamed/vc.vim'
     Plug 'tpope/vim-rhubarb'
-    Plug 'mhinz/vim-signify'
+    Plug 'ssmike/vim-signify'
 
     if has('python3')
         if has('nvim')
