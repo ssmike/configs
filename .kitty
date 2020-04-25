@@ -53,7 +53,7 @@ background       #000000
 # in the editor color scheme. Or use the escape codes to set the terminals
 # default colors in a shell script to launch your editor.
 # Be aware that using a value less than 1.0 is a (possibly significant) performance hit.
-background_opacity 0.87
+background_opacity 0.92
 
 # The foreground for selections
 selection_foreground #000000
@@ -382,3 +382,5 @@ macos_hide_titlebar no
 # break any Alt+key keyboard shortcuts in your terminal programs, but you
 # can use the macOS unicode input technique.
 macos_option_as_alt yes
+
+update_check_interval 0
