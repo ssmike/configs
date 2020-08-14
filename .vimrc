@@ -25,6 +25,7 @@ call plug#begin('~/.vim/plugged')
       Plug 'Shougo/deoplete.nvim'
       Plug 'roxma/nvim-yarp'
       Plug 'roxma/vim-hug-neovim-rpc'
+      call deoplete#custom#option('deoplete-options-yarp', v:true)
     endif
 
     Plug 'autozimu/LanguageClient-neovim', {
